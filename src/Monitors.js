@@ -43,7 +43,7 @@ const Monitors = () => {
 							className='d-inline-flex
 '
 						>
-							{monitor != 0 && (
+							{monitor !== 0 && (
 								<DisplayCard
 									monitorNum={monitor}
 									deleteMonitor={handleDelete}

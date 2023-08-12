@@ -18,6 +18,7 @@ const DisplayCard = ({ monitorNum, deleteMonitor }) => {
 	};
 
 	const handleCalculate = () => {
+		// eslint-disable-next-line
 		switch (aspectRatio) {
 			case '16:9':
 				ratio1 = 16;
