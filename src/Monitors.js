@@ -137,7 +137,7 @@ const Monitors = () => {
 	const [draggedId, setDraggedId] = useState(null);
 	const [nearDesk, setNearDesk] = useState(false);
 	const [showMarks, setShowMarks] = useState(true);
-
+	const [showFrame, setShowFrame] = useState(true);
 	const canvasRef = useRef(null);
 
 	// Keep always-fresh refs so event listeners never read stale state
@@ -468,6 +468,25 @@ const Monitors = () => {
 						>
 							{showMarks ? <Eye size={16} /> : <EyeSlash size={16} />}
 						</button>
+						<button
+							type="button"
+							onClick={() => setShowFrame(prev => !prev)}
+							title={showFrame ? 'Hide monitor frame' : 'Show monitor frame'}
+							style={{
+								border: '1px solid rgba(148,163,184,0.25)',
+								background: 'rgba(255,255,255,0.05)',
+								borderRadius: '8px',
+								width: '32px',
+								height: '32px',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								color: '#94a3b8',
+								cursor: 'pointer'
+							}}
+						>
+							{showFrame ? '🖥️' : '⬜'}
+						</button>
 					</div>
 					<div className={`drag-canvas-desk ${nearDesk ? 'desk-active' : ''}`} />
 
@@ -518,15 +537,22 @@ const Monitors = () => {
 									{m.diagonal}" Monitor
 								</div>
 								<div
+
 									className='monitor-screen visualizer-screen'
 									style={{
 										width: screenWpx,
 										height: screenHpx,
-										transition: isBeingDragged ? 'none' : 'width 0.3s, height 0.3s, transform 0.4s ease',
+										border: showFrame ? undefined : 'none',
+										borderBottomWidth: showFrame ? undefined : 0,
+										boxShadow: showFrame ? undefined : 'none',
+										transition: isBeingDragged
+											? 'none'
+											: 'width 0.3s, height 0.3s, transform 0.4s ease',
 										transform: isStacked ? 'rotate(180deg)' : 'none',
 										transformOrigin: 'center center'
 									}}
 								>
+
 									<div style={{
 										position: 'absolute', inset: 0,
 										backgroundImage: `url(/wallpapers/wp${m.wallpaper || 1}.png)`,
@@ -566,7 +592,7 @@ const Monitors = () => {
 								</div>
 
 								{/* Stand */}
-								{!isStacked && (
+								{!isStacked && showFrame && (
 									<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 										<div className='monitor-stand-neck' />
 										<div className='monitor-stand-base' />
