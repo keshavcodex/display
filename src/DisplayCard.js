@@ -1,102 +1,151 @@
-import { useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import { XCircle } from 'react-bootstrap-icons';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
+import { XCircle, Display, ArrowsAngleExpand } from 'react-bootstrap-icons';
+import { calculateDimensions } from './Monitors';
 
-const DisplayCard = ({ monitorNum, deleteMonitor }) => {
-	const [diagonal, setDiagonal] = useState();
-	const [length, setLength] = useState();
-	const [width, setWidth] = useState();
-	const [aspectRatio, setAspectRatio] = useState();
+const DisplayCard = ({ monitor, cmPerInch, onUpdate, onDelete }) => {
+	const { id, diagonal, aspectRatio, orientation = 'landscape' } = monitor;
 
-	var ratio1 = 16;
-	var ratio2 = 9;
+	const { length, width } = calculateDimensions(diagonal, aspectRatio);
+	const displayW = orientation === 'portrait' ? width : length;
+	const displayH = orientation === 'portrait' ? length : width;
 
-	const handleDelete = (value) => {
-		deleteMonitor(value);
-	};
+	// Area in sq-inches
+	const areaSqIn = displayW && displayH ? (displayW * displayH).toFixed(1) : '—';
+	// PPI (pixels per inch) — rough estimate for common resolutions
+	const commonRes = { '16:9': [1920, 1080], '21:9': [3440, 1440], '32:9': [5120, 1440], '16:18': [2560, 2880] };
+	const [rW, rH] = commonRes[aspectRatio] || [1920, 1080];
+	const diagPx = diagonal ? Math.sqrt(rW * rW + rH * rH) : null;
+	const ppi = diagonal && parseFloat(diagonal) > 0 ? Math.round(diagPx / parseFloat(diagonal)) : '—';
 
-	const handleCalculate = () => {
-		// eslint-disable-next-line
-		switch (aspectRatio) {
-			case '16:9':
-				ratio1 = 16;
-				ratio2 = 9;
-				break;
-			case '21:9':
-				ratio1 = 21;
-				ratio2 = 9;
-				break;
-			case '32:9':
-				ratio1 = 32;
-				ratio2 = 9;
-				break;
-			case '16:18':
-				ratio1 = 16;
-				ratio2 = 18;
-				break;
-		}
-
-		var side1 = Math.sqrt(
-			Math.pow(diagonal, 2) / (1 + Math.pow(ratio2 / ratio1, 2))
-		);
-		var side2 = (ratio2 * side1) / ratio1;
-		setLength(Math.round(side1 * 100) / 100);
-		setWidth(Math.round(side2 * 100) / 100);
+	const handleFieldChange = (field, value) => {
+		onUpdate(id, { ...monitor, [field]: value });
 	};
 
 	return (
-		<div className='m-2 card bg-dark rounded-4'>
-			<div className='some'>
-				<div className='my-2'>
-					<span className='text-light fs-2 ps-3'>
-						Monitor {diagonal} {diagonal && 'inch'}
-					</span>
-					<span
-						className='text-light float-end m-1 pe-2'
-						onClick={() => handleDelete(monitorNum)}
-					>
-						<XCircle color='white' size={20} />
-					</span>
+		<div className='card' style={{ borderRadius: '20px' }}>
+			{/* Header */}
+			<div className='display-card-header'>
+				<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+					<div style={{
+						width: 36, height: 36, borderRadius: '10px',
+						background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15))',
+						border: '1px solid rgba(96,165,250,0.2)',
+						display: 'flex', alignItems: 'center', justifyContent: 'center'
+					}}>
+						<Display size={17} color='#60a5fa' />
+					</div>
+					<div>
+						<div style={{ fontSize: '1rem', fontWeight: 700, color: '#e2e8f0', lineHeight: 1.2 }}>
+							{diagonal ? `${diagonal}"` : '—'} Monitor
+						</div>
+						<div style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 500, marginTop: 2 }}>
+							{aspectRatio} · {orientation}
+						</div>
+					</div>
+				</div>
+				<button
+					onClick={() => onDelete(id)}
+					style={{
+						background: 'rgba(239,68,68,0.08)',
+						border: '1px solid rgba(239,68,68,0.15)',
+						borderRadius: '8px',
+						padding: '6px',
+						cursor: 'pointer',
+						display: 'flex', alignItems: 'center', justifyContent: 'center',
+						transition: 'all 0.2s',
+						color: '#ef4444',
+					}}
+					onMouseOver={e => {
+						e.currentTarget.style.background = 'rgba(239,68,68,0.18)';
+						e.currentTarget.style.borderColor = 'rgba(239,68,68,0.35)';
+					}}
+					onMouseOut={e => {
+						e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+						e.currentTarget.style.borderColor = 'rgba(239,68,68,0.15)';
+					}}
+				>
+					<XCircle size={16} />
+				</button>
+			</div>
+
+			{/* Body */}
+			<div className='display-card-body'>
+
+				{/* Diagonal input */}
+				<div className='diagonal-input-wrap'>
+					<span className='diagonal-input-label'>Diagonal</span>
+					<input
+						type='number'
+						className='diagonal-input-field'
+						placeholder='e.g. 32'
+						value={diagonal}
+						onChange={(e) => handleFieldChange('diagonal', e.target.value)}
+					/>
+					<span className='diagonal-input-suffix'>inch</span>
 				</div>
 
-				<InputGroup variant='bg-dark' className='px-3'>
-					<InputGroup.Text>Diagonal</InputGroup.Text>
-					<Form.Control
-						value={diagonal}
-						onChange={(e) => setDiagonal(e.target.value)}
-					/>
-				</InputGroup>
-				<InputGroup className='p-3'>
-					<InputGroup.Text>Length</InputGroup.Text>
-					{/* <span className='bg-light pt-2'>{length}</span> */}
-					<Form.Control
-						value={length}
-						// onChange={(e) => setLength(e.target.value)}
-					/>
-					<InputGroup.Text>Width</InputGroup.Text>
-					{/* <span className='bg-light pt-2'>{width}</span> */}
-					<Form.Control
-						value={width}
-						// onChange={(e) => setWidth(e.target.value)}
-					/>
-				</InputGroup>
-				<div className='form-group m-3'>
+				{/* Aspect ratio */}
+				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
 					<select
-						className='form-control custom-select'
+						className='aspect-select'
 						value={aspectRatio}
-						onChange={(event) => setAspectRatio(event.target.value)}
+						onChange={(e) => handleFieldChange('aspectRatio', e.target.value)}
 					>
-						<option value='16:9'>Select Aspect Ratio (16:9 is default)</option>
-						<option value='21:9'>21:9</option>
-						<option value='32:9'>32:9</option>
-						<option value='16:18'>16:18</option>
+						<option value='16:9'>16:9 — Standard</option>
+						<option value='21:9'>21:9 — Ultrawide</option>
+						<option value='32:9'>32:9 — Super Wide</option>
+						<option value='16:18'>16:18 — DualUp</option>
+					</select>
+
+					<select
+						className='aspect-select'
+						value={monitor.wallpaper || 1}
+						onChange={(e) => handleFieldChange('wallpaper', parseInt(e.target.value))}
+					>
+						<option value={1}>Neon Waves</option>
+						<option value={2}>Cyber Grid</option>
+						<option value={3}>Fluid Gradient</option>
+						<option value={4}>Deep Space</option>
+						<option value={5}>Minimal Dark</option>
 					</select>
 				</div>
-				<Button onClick={handleCalculate} className='m-3'>
-					Calculate
-				</Button>
+
+				{/* Stat grid */}
+				<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+					<div className='display-card-stat'>
+						<span className='display-card-stat-label'>Width</span>
+						<span className='display-card-stat-value'>{displayW ? `${displayW}"` : '—'}</span>
+					</div>
+					<div className='display-card-stat'>
+						<span className='display-card-stat-label'>Height</span>
+						<span className='display-card-stat-value'>{displayH ? `${displayH}"` : '—'}</span>
+					</div>
+					{/* <div className='display-card-stat'>
+						<span className='display-card-stat-label'>Area</span>
+						<span className='display-card-stat-value'>{areaSqIn} in²</span>
+					</div>
+					<div className='display-card-stat'>
+						<span className='display-card-stat-label'>PPI ~</span>
+						<span className='display-card-stat-value'>{ppi}</span>
+					</div> */}
+				</div>
+
+				{/* Orientation toggle */}
+				<div style={{ display: 'flex', gap: '0.5rem' }}>
+					<button
+						type='button'
+						className={`orientation-btn${orientation === 'landscape' ? ' active' : ''}`}
+						onClick={() => handleFieldChange('orientation', 'landscape')}
+					>
+						🌅 Landscape
+					</button>
+					<button
+						type='button'
+						className={`orientation-btn${orientation === 'portrait' ? ' active' : ''}`}
+						onClick={() => handleFieldChange('orientation', 'portrait')}
+					>
+						📱 Portrait
+					</button>
+				</div>
 			</div>
 		</div>
 	);
