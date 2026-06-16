@@ -313,8 +313,6 @@ const Monitors = () => {
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 			const canvasW = canvas.offsetWidth;
-			const canvasH = canvas.offsetHeight;
-			const deskTop = canvasH - DESK_H;
 			const curPositions = positionsRef.current;
 			const curMonitors = monitorsRef.current;
 			const curCmPerInch = cmPerInchRef.current;
@@ -326,7 +324,7 @@ const Monitors = () => {
 			for (const m of curMonitors) {
 				const pos = curPositions[m.id];
 				if (!pos) continue;
-				const { w, h } = getScreenPx(m, curCmPerInch);
+				const { w } = getScreenPx(m, curCmPerInch);
 				aligned[m.id] = { x: pos.x, y: pos.y, w };
 				minX = Math.min(minX, pos.x);
 				maxX = Math.max(maxX, pos.x + w);

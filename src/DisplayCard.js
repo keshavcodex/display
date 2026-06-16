@@ -1,4 +1,4 @@
-import { XCircle, Display, ArrowsAngleExpand } from 'react-bootstrap-icons';
+import { XCircle, Display } from 'react-bootstrap-icons';
 import { calculateDimensions } from './Monitors';
 
 const DisplayCard = ({ monitor, cmPerInch, onUpdate, onDelete }) => {
@@ -7,14 +7,6 @@ const DisplayCard = ({ monitor, cmPerInch, onUpdate, onDelete }) => {
 	const { length, width } = calculateDimensions(diagonal, aspectRatio);
 	const displayW = orientation === 'portrait' ? width : length;
 	const displayH = orientation === 'portrait' ? length : width;
-
-	// Area in sq-inches
-	const areaSqIn = displayW && displayH ? (displayW * displayH).toFixed(1) : '—';
-	// PPI (pixels per inch) — rough estimate for common resolutions
-	const commonRes = { '16:9': [1920, 1080], '21:9': [3440, 1440], '32:9': [5120, 1440], '16:18': [2560, 2880] };
-	const [rW, rH] = commonRes[aspectRatio] || [1920, 1080];
-	const diagPx = diagonal ? Math.sqrt(rW * rW + rH * rH) : null;
-	const ppi = diagonal && parseFloat(diagonal) > 0 ? Math.round(diagPx / parseFloat(diagonal)) : '—';
 
 	const handleFieldChange = (field, value) => {
 		onUpdate(id, { ...monitor, [field]: value });
@@ -119,14 +111,6 @@ const DisplayCard = ({ monitor, cmPerInch, onUpdate, onDelete }) => {
 						<span className='display-card-stat-label'>Height</span>
 						<span className='display-card-stat-value'>{displayH ? `${displayH}"` : '—'}</span>
 					</div>
-					{/* <div className='display-card-stat'>
-						<span className='display-card-stat-label'>Area</span>
-						<span className='display-card-stat-value'>{areaSqIn} in²</span>
-					</div>
-					<div className='display-card-stat'>
-						<span className='display-card-stat-label'>PPI ~</span>
-						<span className='display-card-stat-value'>{ppi}</span>
-					</div> */}
 				</div>
 
 				{/* Orientation toggle */}
